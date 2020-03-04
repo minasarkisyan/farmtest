@@ -5,6 +5,7 @@ abstract class Animal{
     private $id;
 
     public abstract function getProduct();
+
     
 }
 
@@ -43,16 +44,13 @@ class Cow extends Animal{
     }
 }
 
+
 class FactoryAnimal
-{
-    public function createСhicken(): chicken
-    {
-        return new Chicken;
-    }
+{   
     
-    public function createCow(): cow
+    public static function createAnimal($type)
     {
-        return new Cow;
+        return new $type;
     }
 }
 
@@ -60,22 +58,13 @@ class FactoryAnimal
 class Crib
 {
     
-    public $storageChicken = [];
-    public $storageCow = [];
+    public $storage = [];
 
-    public function addStorageChicken($qty,FactoryAnimal $factory )
+    public function addStorageAnimal($qty, $type)
     {
         for ($i=1; $i <= $qty ; $i++) { 
             
-            $this->storageChicken[] = $factory->createСhicken();
-        }
-        
-    }
-
-    public function addStorageCow($qty, FactoryAnimal $factory)
-    {
-        for ($i=1; $i <= $qty ; $i++) { 
-            $this->storageCow[] = $factory->createCow();
+            $this->storage[] = FactoryAnimal::createAnimal($type);
         }
         
     }
@@ -85,39 +74,55 @@ class Crib
 class ProductPicker
 {
     
-    public $milk = 0;
-    public $egg = 0;
-    
+    public $product = 0;
+    public $type;
 
-    public function getMilk(Crib $crib)
+    function __construct($type)
+    {
+        $this->type = $type;
+    }
+
+    public function getProduct(Crib $crib)
     { 
-        foreach ($crib->storageCow as $value){
-            $this->milk += $value->getProduct();
+        foreach ($crib->storage as $value){
+            $this->product += $value->getProduct();
         }
 
     }
 
-    public function getEgg(Crib $crib)
-    { 
-        foreach ($crib->storageChicken as $value){
-            
-            $this->egg += $value->getProduct();
+    public function getTypeProduct($animal)
+    {
+        switch ($animal) {
+            case 'Chicken':
+                return "Собрано яиц: " .  $this->product . "шт.";
+                break;
+            case 'Cow':
+                return "Надоено молока: " .  $this->product . "Литров";
+                break;
+            default:
+                return "Сегодня пусто";
+                break;
         }
-
     }
 }
 
 
+$cow = 'Cow';
+
 $crib = new Crib();
-$factory = new FactoryAnimal();
-$crib->addStorageChicken(20, $factory);
-$crib->addStorageCow(10, $factory);
+$crib->addStorageAnimal(10, $cow);
 
+$milk = new ProductPicker($cow);
+$milk->getProduct($crib);
 
-$picker = new ProductPicker();
-$picker->getMilk($crib);
-$picker->getEgg($crib);
+echo $milk->getTypeProduct($cow) . '<br>';
 
+$chicken = 'Chicken';
 
-echo "Всего собрано: молоко {$picker->milk}" . "\n";
-echo "Всего собрано: яйца {$picker->egg}" . "\n";
+$crib = new Crib();
+$crib->addStorageAnimal(20, $chicken);
+
+$egg = new ProductPicker($chicken);
+$egg->getProduct($crib);
+
+echo $egg->getTypeProduct($chicken) . '<br>';
